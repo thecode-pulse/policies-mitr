@@ -1,0 +1,24 @@
+# Core
+streamlit
+numpy
+matplotlib
+scikit-learn
+
+# NLP / Transformers (GPU-enabled)
+transformers
+torch>=2.0.0  # GPU-compatible PyTorch - supports CUDA and MPS
+sentence-transformers
+sentencepiece
+
+# Image & PDF Processing
+opencv-python-headless
+Pillow
+pytesseract
+pdfplumber
+
+# Other Utilities
+regex
+pyttsx3
+pymupdf 
+edge_tts
+argostranslate
