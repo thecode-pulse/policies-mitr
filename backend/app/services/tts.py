@@ -12,6 +12,10 @@ VOICES = {
     "ta": "ta-IN-PallaviNeural",
     "bn": "bn-IN-TanishaaNeural",
     "gu": "gu-IN-DhwaniNeural",
+    "kn": "kn-IN-SapnaNeural",
+    "te": "te-IN-ShrutiNeural",
+    "ur": "ur-IN-GulNeural",
+    "ml": "ml-IN-SobhanaNeural"
 }
 
 

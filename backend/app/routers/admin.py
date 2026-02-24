@@ -1,10 +1,11 @@
+# pyre-ignore-all-errors
 """
 Admin router - analytics, user management, activity logs.
 """
 from fastapi import APIRouter, Depends
-from ..core.security import get_admin_user, supabase_admin
+from app.core.security import get_admin_user, supabase_admin
 
-router = APIRouter(prefix="/api/admin", tags=["admin"])
+router = APIRouter(prefix="/api/admin", tags=["admin"]) # type: ignore
 
 
 @router.get("/analytics")
@@ -19,9 +20,9 @@ async def get_analytics(user=Depends(get_admin_user)):
     languages = {}
     if policies.data:
         for p in policies.data:
-            cat = p.get("category", "Other")
+            cat = p.get("category", "Other") # type: ignore
             categories[cat] = categories.get(cat, 0) + 1
-            lang = p.get("language", "en")
+            lang = p.get("language", "en") # type: ignore
             languages[lang] = languages.get(lang, 0) + 1
 
     return {

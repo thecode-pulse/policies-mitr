@@ -71,7 +71,7 @@ export default function Upload() {
     };
 
     return (
-        <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px' }}>
                     📤 Upload Policy Document
@@ -223,7 +223,7 @@ export default function Upload() {
                     <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                         <FiAlertCircle size={14} style={{ marginRight: '6px', verticalAlign: 'middle', color: 'var(--primary)' }} />
                         <strong>How it works:</strong> Your document is parsed, then analyzed by AI to extract a summary,
-                        simplified explanation, clause-by-clause breakdown, Hindi translation, and difficulty score.
+                        simplified explanation, clause-by-clause breakdown, multilingual translation, and difficulty score.
                         You can then chat with the AI about your policy.
                     </p>
                 </div>

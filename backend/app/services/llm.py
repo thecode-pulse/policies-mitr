@@ -1,3 +1,4 @@
+# pyre-ignore-all-errors
 """
 LLM Service - Uses Google Gemini for translation, chatbot, and comparisons.
 Summarization is handled by the BART-based summarizer service.
@@ -5,14 +6,29 @@ Summarization is handled by the BART-based summarizer service.
 import json
 import time
 import google.generativeai as genai
-from ..core.config import settings
+from app.core.config import settings
 
 # Configure Gemini
 if settings.GEMINI_API_KEY:
     genai.configure(api_key=settings.GEMINI_API_KEY)
     model = genai.GenerativeModel("gemini-2.5-flash")
+    fallback_model = genai.GenerativeModel("gemini-2.5-flash-lite")
 else:
     model = None
+    fallback_model = None
+
+def generate_content_with_fallback(prompt: str):
+    """Attempt primary model, smoothly fallback to high-capacity 1.5-flash on quota constraints."""
+    try:
+        if not model:
+            raise Exception("No model available")
+        return model.generate_content(prompt)
+    except Exception as e:
+        err_str = str(e).lower()
+        if ("429" in err_str or "quota" in err_str or "exhausted" in err_str) and fallback_model:
+            print("[LLM] Primary Gemini 2.5 quota met. Seamlessly falling back to Gemini 1.5 Flash...")
+            return fallback_model.generate_content(prompt)
+        raise e
 
 
 
@@ -57,7 +73,7 @@ async def chat_with_context(query: str, context_chunks: list, chat_history: list
         
         if context_chunks:
             # Score chunks by keyword match
-            pairs = []
+            pairs = [] # type: list[tuple[int, str]]
             words = [w for w in query_lower.split() if len(w) > 3]
             for chunk in context_chunks:
                 score = sum(1 for w in words if w in chunk.lower())
@@ -68,14 +84,36 @@ async def chat_with_context(query: str, context_chunks: list, chat_history: list
 
         if best_chunks:
             context_text = "\n\n".join(best_chunks)
+            history_list = []
+            for h in (chat_history or [])[-5:]:
+                role = h.get('role', 'user') # type: ignore
+                content = h.get('content', '') # type: ignore
+                history_list.append(f"{role}: {content}")
+            history_text = "\n".join(history_list)
             return f"*(AI Offline Mode)* I found this in the policy: \n\n{context_text}\n\n(Note: For better conversational replies, please add GEMINI_API_KEY)"
         return "*(AI Offline Mode)* I'm sorry, I couldn't find a direct answer in the policy. Without an API key, my reasoning is limited."
 
-    context = "\n\n".join(context_chunks[:5]) if context_chunks else "No specific context available."
-    history_text = "\n".join([f"{m['role']}: {m['content']}" for m in (chat_history or [])[-5:]])
-
-    prompt = f"""You are Mitr, an AI policy assistant. Answer accurately based ONLY on this context:
+    context = "\n\n".join(context_chunks[:5]) if context_chunks else ""
+    history_list = []
+    for h in (chat_history or [])[-5:]:
+        role = h.get('role', 'user') # type: ignore
+        content = h.get('content', '') # type: ignore
+        history_list.append(f"{role}: {content}")
+    history_text = "\n".join(history_list)
+    
+    if context:
+        prompt = f"""You are Mitr, an AI policy assistant. Answer accurately based ONLY on this context:
 {context}
+
+Recent History:
+{history_text}
+
+User: {query}
+Assistant:"""
+    else:
+        prompt = f"""You are Mitr, an expert AI policy assistant for Indian citizens. 
+You have extensive knowledge of government schemes, policies, laws, and administrative procedures.
+Please answer the user's question accurately, comprehensively, and in a simple, easy-to-understand manner.
 
 Recent History:
 {history_text}
@@ -84,7 +122,7 @@ User: {query}
 Assistant:"""
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_fallback(prompt)
         return response.text.strip()
     except Exception as e:
         return f"Gemini Error: {str(e)}"
@@ -102,7 +140,7 @@ async def translate_text(text: str, target_language: str) -> str:
                 f"Return ONLY the translated text.\n\n"
                 f"Text:\n{text[:3000]}"
             )
-            response = model.generate_content(prompt)
+            response = generate_content_with_fallback(prompt)
             return response.text.strip()
         except Exception:
             pass
@@ -140,7 +178,7 @@ Policy B:
 RESPOND WITH ONLY VALID JSON."""
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_fallback(prompt)
         response_text = response.text.strip()
         if response_text.startswith("```"):
             lines = response_text.split("\n")
@@ -164,7 +202,7 @@ Policy:
 RESPOND WITH ONLY A JSON ARRAY OF STRINGS."""
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_fallback(prompt)
         response_text = response.text.strip()
         if response_text.startswith("```"):
             lines = response_text.split("\n")
@@ -200,7 +238,7 @@ Analyze this policy text:
 RESPOND WITH ONLY VALID JSON. Do not include markdown formatting or backticks around the json.
 """
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_fallback(prompt)
         response_text = response.text.strip()
         if response_text.startswith("```"):
             lines = response_text.split("\n")

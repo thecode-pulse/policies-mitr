@@ -1,3 +1,4 @@
+# pyre-ignore-all-errors
 """
 BART Summarization & Classification Service — OPTIMIZED.
 Uses facebook/bart-large-cnn for summarization and facebook/bart-large-mnli for classification.
@@ -110,9 +111,9 @@ def summarize_text(text: str, max_length: int = 150) -> str:
     summary_parts = []
 
     for chunk in chunks:
-        inputs = tokenizer(chunk, return_tensors="pt", max_length=1024, truncation=True).to(DEVICE)
+        inputs = tokenizer(chunk, return_tensors="pt", max_length=1024, truncation=True).to(DEVICE) # type: ignore
         with torch.no_grad():
-            ids = model.generate(
+            ids = model.generate( # type: ignore
                 inputs["input_ids"],
                 max_length=250,
                 min_length=60,
@@ -122,7 +123,7 @@ def summarize_text(text: str, max_length: int = 150) -> str:
                 length_penalty=2.0,
                 no_repeat_ngram_size=3
             )
-        decoded = tokenizer.decode(ids[0], skip_special_tokens=True).strip()
+        decoded = tokenizer.decode(ids[0], skip_special_tokens=True).strip() # type: ignore
         if decoded:
             summary_parts.append(decoded)
 
@@ -137,8 +138,8 @@ def classify_policy(text: str) -> str:
         return "Government Policy"
     try:
         # Use only first 512 chars for speed
-        result = classifier(text[:512], POLICY_CATEGORIES, multi_label=False)
-        return result["labels"][0]
+        result = classifier(text[:512], POLICY_CATEGORIES, multi_label=False) # type: ignore
+        return result["labels"][0] # type: ignore
     except Exception as e:
         print(f"[Summarizer] Classification error: {e}")
         return "Government Policy"

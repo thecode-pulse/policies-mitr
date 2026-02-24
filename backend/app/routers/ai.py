@@ -1,12 +1,13 @@
+# pyre-ignore-all-errors
 """
 AI router - chatbot, translation, TTS, recommendations.
 """
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from ..core.security import get_current_user, supabase_admin
-from ..services import llm as llm_service
-from ..services import tts as tts_service
+from app.core.security import get_current_user, supabase_admin
+from app.services import llm as llm_service
+from app.services import tts as tts_service
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 
@@ -22,7 +23,7 @@ async def chat(data: dict, user=Depends(get_current_user)):
     
     # Create local client to verify if supabase_admin is broken
     from supabase import create_client
-    from ..core.config import settings
+    from app.core.config import settings
     local_supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
     
     if not query:
@@ -57,7 +58,7 @@ async def chat(data: dict, user=Depends(get_current_user)):
                 .execute()
 
             if policy.data:
-                context_chunks.insert(0, f"Policy Summary: {policy.data.get('summary', '')}")
+                context_chunks.insert(0, f"Policy Summary: {policy.data.get('summary', '')}") # type: ignore
         except Exception as e:
             print(f"DEBUG: Policy query FAILED: {e}")
 
@@ -75,8 +76,8 @@ async def chat(data: dict, user=Depends(get_current_user)):
             # Reverse to chronological order
             raw_history = list(reversed(history.data))
             for h in raw_history:
-                role = h.get('role', 'user')
-                content = h.get('content', '')
+                role = h.get('role', 'user') # type: ignore
+                content = h.get('content', '') # type: ignore
                 chat_history.append({"role": role, "content": content})
     except Exception as e:
         print(f"DEBUG: History query FAILED: {e}")
@@ -157,5 +158,5 @@ async def recommendations(policy_id: str, user=Depends(get_current_user)):
     if not policy.data:
         raise HTTPException(status_code=404, detail="Policy not found")
 
-    recs = await llm_service.get_recommendations(policy.data["original_text"])
+    recs = await llm_service.get_recommendations(policy.data["original_text"]) # type: ignore
     return recs

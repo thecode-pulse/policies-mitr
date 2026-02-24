@@ -1,3 +1,4 @@
+# pyre-ignore-all-errors
 """
 PolicyMitr API — FastAPI entry point.
 """

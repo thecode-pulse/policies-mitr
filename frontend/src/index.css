@@ -51,6 +51,56 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
+}
+
+/* Ambient Background Glows */
+.bg-glow-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.15;
+  animation: pulse 8s ease-in-out infinite alternate;
+}
+
+.bg-glow-1 {
+  width: 600px;
+  height: 600px;
+  background: var(--primary);
+  top: -10%;
+  left: -5%;
+}
+
+.bg-glow-2 {
+  width: 500px;
+  height: 500px;
+  background: var(--accent);
+  bottom: -10%;
+  right: -5%;
+  animation-delay: -4s;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.15;
+  }
+
+  100% {
+    transform: scale(1.1) translate(20px, 20px);
+    opacity: 0.25;
+  }
 }
 
 /* Scrollbar */
@@ -206,8 +256,12 @@ body {
 /* Main Content */
 .main-content {
   margin-left: 260px;
-  padding: 32px;
+  padding: 40px;
   min-height: 100vh;
+  flex: 1;
+  /* Stretch to occupy the remaining space right of sidebar */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Page Animations */

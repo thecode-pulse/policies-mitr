@@ -31,7 +31,7 @@ export default function Dashboard() {
     ];
 
     return (
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px' }}>👋 Welcome back!</h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '15px' }}>

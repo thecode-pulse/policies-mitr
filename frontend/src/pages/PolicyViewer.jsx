@@ -33,7 +33,21 @@ export default function PolicyViewer() {
     const [chatLoading, setChatLoading] = useState(false);
     const [translatedSummary, setTranslatedSummary] = useState('');
     const [translating, setTranslating] = useState(false);
+    const [targetLang, setTargetLang] = useState('hi');
+    const [activeTranslatedLang, setActiveTranslatedLang] = useState(null);
     const chatEndRef = useRef(null);
+
+    const supportedLanguages = [
+        { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
+        { code: 'mr', name: 'Marathi', flag: '🇮🇳' },
+        { code: 'bn', name: 'Bengali', flag: '🇮🇳' },
+        { code: 'ta', name: 'Tamil', flag: '🇮🇳' },
+        { code: 'te', name: 'Telugu', flag: '🇮🇳' },
+        { code: 'gu', name: 'Gujarati', flag: '🇮🇳' },
+        { code: 'kn', name: 'Kannada', flag: '🇮🇳' },
+        { code: 'ur', name: 'Urdu', flag: '🇮🇳' },
+        { code: 'ml', name: 'Malayalam', flag: '🇮🇳' }
+    ];
 
     useEffect(() => {
         loadPolicy();
@@ -77,6 +91,7 @@ export default function PolicyViewer() {
         try {
             const res = await translateText(text, lang);
             setTranslatedSummary(res.data.translated_text);
+            setActiveTranslatedLang(supportedLanguages.find(l => l.code === lang) || { name: 'Translated', flag: '🌐' });
         } catch {
             toast.error('Translation failed');
         } finally {
@@ -244,14 +259,28 @@ export default function PolicyViewer() {
                                                 {loadingTts ? '...' : playing ? <FiSquare size={14} /> : <FiVolume2 size={16} />}
                                                 {playing ? 'Stop' : 'Listen'}
                                             </button>
-                                            <button
-                                                onClick={() => handleTranslate(policy.summary, 'hi')}
-                                                disabled={translating}
-                                                className="btn-gradient"
-                                                style={{ padding: '10px 20px', fontSize: '13px', gap: '8px' }}
-                                            >
-                                                <FiGlobe size={16} /> {translating ? 'Translating...' : 'Hindi'}
-                                            </button>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '4px' }}>
+                                                <select
+                                                    value={targetLang}
+                                                    onChange={(e) => setTargetLang(e.target.value)}
+                                                    className="input-field"
+                                                    style={{ width: '130px', padding: '6px 10px', fontSize: '13px', background: 'transparent', border: 'none', color: 'var(--text-primary)' }}
+                                                >
+                                                    {supportedLanguages.map(lang => (
+                                                        <option key={lang.code} value={lang.code} style={{ color: '#000' }}>
+                                                            {lang.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <button
+                                                    onClick={() => handleTranslate(policy.summary, targetLang)}
+                                                    disabled={translating}
+                                                    className="btn-gradient"
+                                                    style={{ padding: '8px 16px', fontSize: '13px', gap: '8px', borderRadius: '8px' }}
+                                                >
+                                                    <FiGlobe size={16} /> {translating ? 'Translating...' : 'Translate'}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                     <p style={{ color: 'var(--text-secondary)', lineHeight: 1.9, fontSize: '16px', whiteSpace: 'pre-line' }}>
@@ -271,10 +300,12 @@ export default function PolicyViewer() {
                                                 }}
                                             >
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                                    <h4 style={{ fontWeight: 800, color: 'var(--accent-light)', fontSize: '15px' }}>🇮🇳 Hindi Translation</h4>
+                                                    <h4 style={{ fontWeight: 800, color: 'var(--accent-light)', fontSize: '15px' }}>
+                                                        {activeTranslatedLang?.flag} {activeTranslatedLang?.name} Translation
+                                                    </h4>
                                                     <button
                                                         type="button"
-                                                        onClick={(e) => handleSpeak(translatedSummary, 'hi', e)}
+                                                        onClick={(e) => handleSpeak(translatedSummary, activeTranslatedLang?.code || 'hi', e)}
                                                         disabled={loadingTts}
                                                         style={{
                                                             background: 'rgba(139, 92, 246, 0.1)', border: 'none',
@@ -282,7 +313,7 @@ export default function PolicyViewer() {
                                                             fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px'
                                                         }}
                                                     >
-                                                        {playing ? <FiSquare size={12} /> : <FiVolume2 size={14} />} Listen (Hindi)
+                                                        {playing ? <FiSquare size={12} /> : <FiVolume2 size={14} />} Listen ({activeTranslatedLang?.name})
                                                     </button>
                                                 </div>
                                                 <p style={{ color: 'var(--text-secondary)', lineHeight: 1.9, fontSize: '16px' }}>

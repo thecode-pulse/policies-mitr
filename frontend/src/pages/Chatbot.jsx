@@ -40,7 +40,7 @@ export default function Chatbot() {
     };
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto', height: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', width: '100%', height: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column' }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div style={{ marginBottom: '16px' }}>
                     <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px' }}>

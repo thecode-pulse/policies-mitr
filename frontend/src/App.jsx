@@ -37,7 +37,13 @@ import './index.css';
 // Layout with sidebar for authenticated pages
 function DashboardLayout({ user }) {
   return (
-    <div style={{ display: 'flex' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', position: 'relative' }}>
+      {/* Ambient Background Lights */}
+      <div className="bg-glow-wrapper">
+        <div className="bg-glow bg-glow-1"></div>
+        <div className="bg-glow bg-glow-2"></div>
+      </div>
+
       <Sidebar user={user} />
       <main className="main-content">
         <Outlet />

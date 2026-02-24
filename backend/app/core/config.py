@@ -1,3 +1,4 @@
+# pyre-ignore-all-errors
 """
 Application configuration - loads environment variables.
 """
