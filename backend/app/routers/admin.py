@@ -15,22 +15,29 @@ async def get_analytics(user=Depends(get_admin_user)):
     policies = supabase_admin.table("policies").select("id, category, language", count="exact").execute()
     actions = supabase_admin.table("activity_logs").select("id", count="exact").execute()
 
-    # Category breakdown
+    # Category breakdown (from policies)
     categories = {}
-    languages = {}
     if policies.data:
         for p in policies.data:
             cat = p.get("category", "Other") # type: ignore
             categories[cat] = categories.get(cat, 0) + 1
-            lang = p.get("language", "en") # type: ignore
-            languages[lang] = languages.get(lang, 0) + 1
+
+    # Language breakdown (from translation activity)
+    languages = {}
+    translations = supabase_admin.table("activity_logs").select("details").eq("action_type", "translated").execute()
+    if translations.data:
+        for t in translations.data:
+            details = t.get("details") or {}
+            lang = details.get("target_language") if isinstance(details, dict) else None
+            if lang:
+                languages[lang] = languages.get(lang, 0) + 1
 
     return {
         "total_users": users.count or 0,
         "total_policies": policies.count or 0,
         "total_actions": actions.count or 0,
         "categories": categories,
-        "languages": languages,
+        "languages": [{"language": lang, "count": count} for lang, count in languages.items()],
     }
 
 

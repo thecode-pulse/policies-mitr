@@ -130,6 +130,18 @@ async def translate(data: dict, user=Depends(get_current_user)):
         raise HTTPException(status_code=400, detail="Text is required")
 
     translated = await llm_service.translate_text(text, target_language)
+
+    # Log activity (non-critical)
+    try:
+        supabase_admin.table("activity_logs").insert({
+            "id": str(uuid.uuid4()),
+            "user_id": user.id,
+            "action_type": "translated",
+            "details": {"target_language": target_language},
+        }).execute()
+    except Exception as e:
+        print(f"DEBUG: Translate log FAILED (Non-fatal): {e}")
+
     return {"translated_text": translated}
 
 

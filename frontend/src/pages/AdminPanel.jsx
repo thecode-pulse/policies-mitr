@@ -18,8 +18,8 @@ export default function AdminPanel() {
         getActivity().then(r => setActivity(r.data)).catch(() => { });
     }, []);
 
-    const categoryData = analytics ? Object.entries(analytics.categories).map(([name, value]) => ({ name, value })) : [];
-    const langData = analytics ? Object.entries(analytics.languages).map(([name, value]) => ({ name, value })) : [];
+    const categoryData = analytics ? Object.entries(analytics.categories || {}).map(([name, value]) => ({ name, value })) : [];
+    const langData = analytics ? (analytics.languages || []).map(l => ({ name: l.language, value: l.count })) : [];
 
     const tabs = [
         { id: 'overview', label: 'Overview', icon: FiActivity },
@@ -72,27 +72,31 @@ export default function AdminPanel() {
 
                     {/* Charts */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                        <div className="glass-card" style={{ padding: '24px' }}>
+                        <div className="glass-card" style={{ padding: '24px', minHeight: '320px' }}>
                             <h3 style={{ fontWeight: 700, marginBottom: '16px' }}>Categories</h3>
-                            <ResponsiveContainer width="100%" height={250}>
-                                <PieChart>
-                                    <Pie data={categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                                        {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            <div style={{ height: '250px', width: '100%', minHeight: '250px' }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie data={categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                                            {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                                        </Pie>
+                                        <Tooltip />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
-                        <div className="glass-card" style={{ padding: '24px' }}>
-                            <h3 style={{ fontWeight: 700, marginBottom: '16px' }}>Languages</h3>
-                            <ResponsiveContainer width="100%" height={250}>
-                                <BarChart data={langData}>
-                                    <XAxis dataKey="name" stroke="#94a3b8" />
-                                    <YAxis stroke="#94a3b8" />
-                                    <Tooltip />
-                                    <Bar dataKey="value" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
+                        <div className="glass-card" style={{ padding: '24px', minHeight: '320px' }}>
+                            <h3 style={{ fontWeight: 700, marginBottom: '16px' }}>Languages (Translations)</h3>
+                            <div style={{ height: '250px', width: '100%', minHeight: '250px' }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={langData}>
+                                        <XAxis dataKey="name" stroke="#94a3b8" />
+                                        <YAxis stroke="#94a3b8" />
+                                        <Tooltip formatter={(value) => [value, 'Translations']} />
+                                        <Bar dataKey="value" fill="#0ea5e9" radius={[4, 4, 0, 0]} label={{ position: 'top', fill: '#94a3b8', fontSize: 12 }} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
                     </div>
                 </div>

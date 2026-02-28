@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { supabase } from './lib/supabase';
+import { getProfile as fetchProfileApi } from './lib/api';
 import Sidebar from './components/layout/Sidebar';
 import ChatWidget from './components/ChatWidget';
 
@@ -69,7 +70,7 @@ export default function App() {
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
         setUser(session?.user || null);
-        // if (session?.user) fetchProfile(session.user.id);
+        if (session?.user) fetchProfile(session.user.id);
       })
       .catch((err) => {
         console.warn('Supabase session error:', err);
@@ -81,20 +82,19 @@ export default function App() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
-      // RLS issue on profiles table causes 500 error - disabled for now
-      // if (session?.user) fetchProfile(session.user.id);
-      // else setProfile(null);
+      if (session?.user) fetchProfile(session.user.id);
+      else setProfile(null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (userId) => {
+  const fetchProfile = async () => {
     try {
-      const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
-      if (data) setProfile(data);
+      const res = await fetchProfileApi();
+      if (res.data) setProfile(res.data);
     } catch (err) {
-      // console.warn('Profile fetch error:', err);
+      console.warn('Profile fetch error:', err);
     }
   };
 
