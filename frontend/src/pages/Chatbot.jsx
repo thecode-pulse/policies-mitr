@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { chat, listPolicies } from '../lib/api';
 import toast from 'react-hot-toast';
-import { FiSend, FiMessageCircle } from 'react-icons/fi';
+import { FiSend, FiMessageCircle, FiCopy } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -37,6 +37,11 @@ export default function Chatbot() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCopy = (text) => {
+        navigator.clipboard.writeText(text);
+        toast.success("Message copied to clipboard!");
     };
 
     return (
@@ -122,10 +127,24 @@ export default function Chatbot() {
                                     {msg.role === 'user' ? (
                                         msg.content
                                     ) : (
-                                        <div className="markdown-content">
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                {msg.content}
-                                            </ReactMarkdown>
+                                        <div style={{ position: 'relative' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--primary-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                    Mitr AI
+                                                </span>
+                                                <button
+                                                    onClick={() => handleCopy(msg.content)}
+                                                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                                                    title="Copy response"
+                                                >
+                                                    <FiCopy size={14} />
+                                                </button>
+                                            </div>
+                                            <div className="markdown-content">
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                    {msg.content}
+                                                </ReactMarkdown>
+                                            </div>
                                         </div>
                                     )}
                                 </motion.div>

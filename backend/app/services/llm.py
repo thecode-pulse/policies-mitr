@@ -152,10 +152,13 @@ async def translate_text(text: str, target_language: str) -> str:
         except: pass
 
     # 3. Deep Translator (Free web-based fallback)
-    try:
-        return GoogleTranslator(source='auto', target=target_language).translate(text[:4500])
-    except Exception as e:
-        return f"Translation error: {e}"
+    if GoogleTranslator is not None:
+        try:
+            return GoogleTranslator(source='auto', target=target_language).translate(text[:4500])
+        except Exception as e:
+            return f"Translation error: {e}"
+    else:
+        return "Translation fallback unavailable (deep_translator not installed)."  
 
 
 async def compare_policies(text_a: str, text_b: str) -> dict:
